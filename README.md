@@ -8,7 +8,7 @@ Configurable Reddit place clone with OAuth authentication created by sverben
 - Timer for placing new pixels
 
 ## Installation
-`npm ci`
+`npm i`
 
 After that, create a config file in the data directory. [Example config](example.config.json)
 
