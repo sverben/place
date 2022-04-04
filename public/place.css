@@ -1,0 +1,73 @@
+body {
+    margin: 0;
+    overflow: hidden;
+}
+
+.picker {
+    display: none;
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    height: 20px;
+    gap: 10px;
+    grid-template-columns: repeat(auto-fit, 20px);
+    align-items: center;
+    justify-content: center;
+    background-color: #ffffff10;
+    backdrop-filter: blur(10px);
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.color {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    border: 2px solid gray;
+    cursor: pointer;
+}
+
+.timer {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    padding: 10px;
+    background-color: #00000070;
+    backdrop-filter: blur(10px);
+    border-radius: 5px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #ffffff;
+    font-family: "Roboto", sans-serif;
+    display: none;
+}
+
+.message {
+    background-color: #00000070;
+    backdrop-filter: blur(10px);
+    position: fixed;
+    top: -50px;
+    padding: 10px;
+    font-size: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: "Roboto", sans-serif;
+    color: salmon;
+    transition: .75s ease;
+    border-radius: 5px;
+}
+
+.login {
+    font-family: "Roboto", sans-serif;
+    font-size: 14px;
+    border-radius: 3px;
+    padding: 7px;
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    color: white;
+    background-color: #2171e3;
+    cursor: pointer;
+    display: none;
+}
