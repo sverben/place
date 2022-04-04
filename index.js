@@ -105,7 +105,7 @@ io.on("connection", socket => {
         if (typeof x === "undefined" || typeof y === "undefined" || typeof color === "undefined") {
             return socket.emit("error", "Invalid arguments");
         }
-        if (!(x < config.width && y < config.height)) return socket.emit("error", "Out of bounds");
+        if (!(x < config.width && y < config.height && x >= 0 && y >= 0)) return socket.emit("error", "Out of bounds");
         if (typeof config.colors[color] === "undefined") return socket.emit("error", "Invalid color");
         if (Date.now() - lastAction.get(socket.request.session) < config.timer) return socket.emit("error", "You can't change the color too often!");
         db[y][x] = color;
