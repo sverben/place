@@ -8,6 +8,7 @@ let content = null;
 let position = null;
 let tileWidth = null;
 let timer = null;
+let palette;
 function drawPlace() {
     ctx.fillStyle = "#333333";
     canvas.width = window.innerWidth;
@@ -26,7 +27,7 @@ function drawPlace() {
 
     for (let y = 0; y < content.length; y++) {
         for (let x = 0; x < content[y].length; x++) {
-            const code = content[y][x];
+            const code = palette[content[y][x]];
             ctx.fillStyle = `rgb(${code[0]}, ${code[1]}, ${code[2]})`;
             ctx.fillRect(x * tileWidth + position.x, y * tileWidth + position.y, tileWidth, tileWidth);
         }
@@ -36,25 +37,20 @@ function drawPlace() {
     ctx.strokeStyle = "black";
     ctx.strokeRect(click[0] * tileWidth + position.x, click[1] * tileWidth + position.y, tileWidth, tileWidth);
 }
-socket.on("place", place => {
-    content = place;
 
-    drawPlace();
-})
 const picker = document.querySelector(".picker");
 const timerEl = document.querySelector(".timer");
 const message = document.querySelector(".message");
-let palette;
 socket.on("showLogin", () => {
     login.style.display = "block";
     login.addEventListener("click", () => {
         window.location.assign("/login");
     })
 })
-socket.on("palette", colors => {
-    palette = colors;
-    for (let id in colors) {
-        const color = colors[id];
+socket.on("place", place => {
+    palette = place.palette;
+    for (let id in palette) {
+        const color = palette[id];
         const el = document.createElement("div");
         el.classList.add("color");
         el.style.backgroundColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
@@ -79,9 +75,13 @@ socket.on("palette", colors => {
 
         picker.append(el);
     }
+
+    content = place.place;
+
+    drawPlace();
 })
 socket.on("color", data => {
-    content[data.y][data.x] = palette[data.color];
+    content[data.y][data.x] = data.color;
     drawPlace();
 })
 socket.on("error", err => {

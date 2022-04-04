@@ -30,7 +30,7 @@ if (!fs.existsSync("data/db.json")) {
     for (let y = 0; y < config.height; y++) {
         data[y] = [];
         for (let x = 0; x < config.width; x++) {
-            data[y][x] = [255, 255, 255];
+            data[y][x] = config.colors.length - 1;
         }
     }
   fs.writeFileSync("data/db.json", JSON.stringify(data));
@@ -85,8 +85,10 @@ app.get("/callback", async (req, res) => {
 })
 
 io.on("connection", socket => {
-    socket.emit("place", db);
-    socket.emit("palette", config.colors);
+    socket.emit("place", {
+        "place": db,
+        "palette": config.colors
+    });
     if (socket.request.session.user) {
         if (!lastAction.has(socket.request.session)) lastAction.set(socket.request.session.user, 0);
 
@@ -106,7 +108,7 @@ io.on("connection", socket => {
         if (!(x < config.width && y < config.height)) return socket.emit("error", "Out of bounds");
         if (typeof config.colors[color] === "undefined") return socket.emit("error", "Invalid color");
         if (Date.now() - lastAction.get(socket.request.session) < config.timer) return socket.emit("error", "You can't change the color too often!");
-        db[y][x] = config.colors[color];
+        db[y][x] = color;
         lastAction.set(socket.request.session.user, Date.now());
 
         io.emit("color", {x, y, color});
