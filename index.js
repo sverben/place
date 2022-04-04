@@ -90,7 +90,7 @@ io.on("connection", socket => {
         "palette": config.colors
     });
     if (socket.request.session.user) {
-        if (!lastAction.has(socket.request.session)) lastAction.set(socket.request.session.user, 0);
+        if (!lastAction.has(socket.request.session.user)) lastAction.set(socket.request.session.user, 0);
 
         if (Date.now() - lastAction.get(socket.request.session.user) < config.timer) {
             socket.emit("timer", Math.ceil((config.timer - (Date.now() - lastAction.get(socket.request.session.user)))/ 1000) * 1000);
@@ -107,7 +107,7 @@ io.on("connection", socket => {
         }
         if (!(x < config.width && y < config.height && x >= 0 && y >= 0)) return socket.emit("error", "Out of bounds");
         if (typeof config.colors[color] === "undefined") return socket.emit("error", "Invalid color");
-        if (Date.now() - lastAction.get(socket.request.session) < config.timer) return socket.emit("error", "You can't change the color too often!");
+        if (Date.now() - lastAction.get(socket.request.session.user) < config.timer) return socket.emit("error", "You can't change the color too often!");
         db[y][x] = color;
         lastAction.set(socket.request.session.user, Date.now());
 
