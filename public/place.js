@@ -10,9 +10,9 @@ let tileWidth = null;
 let timer = null;
 let palette;
 function drawPlace() {
-    ctx.fillStyle = "#333333";
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    ctx.fillStyle = "rgb(124,124,124)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     if (!tileWidth) {
