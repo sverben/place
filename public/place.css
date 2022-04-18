@@ -71,3 +71,23 @@ body {
     cursor: pointer;
     display: none;
 }
+
+.editors {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 0;
+    background-color: #00000070;
+    backdrop-filter: blur(10px);
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    color: white;
+    font-size: 15px;
+    font-family: sans-serif;
+    padding: 10px;
+    text-align: center;
+}
+
+.editors h2 {
+    margin: 0 0 5px;
+}

@@ -45,7 +45,7 @@ app.get("/login", (req, res) => {
     if (typeof req.session.user === "undefined") {
         const authorizationUri = client.authorizeURL({
             redirect_uri: `${config.base_uri}/callback`,
-            scope: "user/basic",
+            scope: "user/basic user/names",
             state: req.query.state
         });
 
@@ -60,7 +60,7 @@ app.get("/callback", async (req, res) => {
     const tokenParams = {
         code: req.query.code,
         redirect_uri: `${config.base_uri}/callback`,
-        scope: "user/basic",
+        scope: "user/basic user/names",
     };
 
     try {
@@ -73,6 +73,7 @@ app.get("/callback", async (req, res) => {
             }
         }) .then(_res => {
             req.session.user = _res.data.id;
+            req.session.name = _res.data.firstName;
 
             return res.redirect("/");
         })
@@ -84,17 +85,23 @@ app.get("/callback", async (req, res) => {
     }
 })
 
+const editors = {};
 io.on("connection", socket => {
     socket.emit("place", {
         "place": db,
         "palette": config.colors
     });
+    socket.emit("editors", editors);
     if (socket.request.session.user) {
         if (!lastAction.has(socket.request.session.user)) lastAction.set(socket.request.session.user, 0);
 
         if (Date.now() - lastAction.get(socket.request.session.user) < config.timer) {
             socket.emit("timer", Math.ceil((config.timer - (Date.now() - lastAction.get(socket.request.session.user)))/ 1000) * 1000);
         }
+        if (!editors[socket.request.session.name]) editors[socket.request.session.name] = 0;
+        editors[socket.request.session.name]++;
+
+        io.emit("editors", editors);
     } else {
         socket.emit("showLogin");
     }
@@ -114,5 +121,12 @@ io.on("connection", socket => {
         io.emit("color", {x, y, color});
         fs.writeFileSync("data/db.json", JSON.stringify(db));
         socket.emit("timer", config.timer);
+    })
+
+    socket.on("disconnect", () => {
+        if (!socket.request.session.name) return;
+        editors[socket.request.session.name]--;
+
+        io.emit("editors", editors);
     })
 })

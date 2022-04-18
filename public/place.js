@@ -167,3 +167,16 @@ function error(err) {
         message.style.top = "-50px";
     }, 3000);
 }
+
+socket.on("editors", editors => {
+    const editorsEl = document.getElementById("list");
+    editorsEl.innerHTML = "";
+
+    for (let editor in editors) {
+        if (editors[editor] === 0) continue;
+        const el = document.createElement("div");
+
+        el.innerText = editor;
+        editorsEl.append(el);
+    }
+})
