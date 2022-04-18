@@ -34,7 +34,7 @@ function drawPlace() {
     }
 
     if (!click) return;
-    ctx.strokeStyle = "black";
+    ctx.strokeStyle = "rgb(124,124,124)";
     ctx.strokeRect(click[0] * tileWidth + position.x, click[1] * tileWidth + position.y, tileWidth, tileWidth);
 }
 
