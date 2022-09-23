@@ -27,7 +27,7 @@ function drawPlace() {
 
     for (let y = 0; y < content.length; y++) {
         for (let x = 0; x < content[y].length; x++) {
-            const code = palette[content[y][x]];
+            const code = content[y][x];
             ctx.fillStyle = `rgb(${code[0]}, ${code[1]}, ${code[2]})`;
             ctx.fillRect(x * tileWidth + position.x, y * tileWidth + position.y, tileWidth, tileWidth);
         }

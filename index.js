@@ -2,38 +2,43 @@ const express = require("express");
 const socket = require("socket.io");
 const fs = require("fs");
 const config = require("./data/config.json");
-const { AuthorizationCode } = require("simple-oauth2");
-const session = require("express-session");
-const axios = require("axios");
+const login = require('@djoamersfoort/djo-login-js')
 
 const PORT = process.env.PORT || 3000;
 
+const djo = new login(config.oauth.client_id, config.oauth.client_secret, 'http://localhost:3000/callback', 'user/basic user/names')
 const app = express();
-app.use(express.static("public"));
-const sessions = session({
-    secret: config.session_key,
-    saveUninitialized:true,
-    cookie: { maxAge: 24 * 60 * 60 * 10000 },
-    resave: false
-})
-app.use(sessions);
-const client = new AuthorizationCode(config.oauth);
 const server = app.listen(PORT, () => {
-  console.log(`Listening on port ${PORT}`);
+    console.log(`Listening on port ${PORT}`);
 });
 const io = socket(server);
-io.use(function(socket, next) {
-    sessions(socket.request, socket.request.res || {}, next);
-});
+app.use(express.static("public"));
+app.use(djo.session);
+io.use(djo.socketSession);
+
 if (!fs.existsSync("data/db.json")) {
     const data = [];
     for (let y = 0; y < config.height; y++) {
         data[y] = [];
         for (let x = 0; x < config.width; x++) {
-            data[y][x] = config.colors.length - 1;
+            data[y][x] = config.colors[config.colors.length - 1];
         }
     }
-  fs.writeFileSync("data/db.json", JSON.stringify(data));
+    fs.writeFileSync("data/db.json", JSON.stringify(data));
+}
+if (!config.lastVersion) {
+    const current = require("./data/db.json")
+    const newData = []
+    current.forEach(row => {
+        const newRow = []
+        newData.push(newRow)
+        row.forEach(column => {
+            newRow.push(config.colors[column])
+        })
+    })
+    config.lastVersion = '1'
+    fs.writeFileSync("data/config.json", JSON.stringify(config))
+    fs.writeFileSync("data/db.json", JSON.stringify(newData))
 }
 const db = require("./data/db.json");
 const lastAction = new Map();
@@ -41,49 +46,11 @@ const lastAction = new Map();
 app.get("/", (req, res) => {
     res.sendFile(__dirname + "/public/place.html");
 })
-app.get("/login", (req, res) => {
-    if (typeof req.session.user === "undefined") {
-        const authorizationUri = client.authorizeURL({
-            redirect_uri: `${config.base_uri}/callback`,
-            scope: "user/basic user/names",
-            state: req.query.state
-        });
-
-        return res.redirect(authorizationUri);
-    } else {
-        return res.redirect("/");
-    }
+app.get("/login", djo.requireLogin, (req, res) => {
+    req.session.name = req.session.djo.firstName
+    res.redirect("/")
 })
-app.get("/callback", async (req, res) => {
-    if (typeof req.query.code === "undefined") return res.send("No");
-
-    const tokenParams = {
-        code: req.query.code,
-        redirect_uri: `${config.base_uri}/callback`,
-        scope: "user/basic user/names",
-    };
-
-    try {
-        const tokenDetails = await client.getToken(tokenParams);
-        const accessToken = tokenDetails.token.access_token;
-
-        axios.get("https://leden.djoamersfoort.nl/api/v1/member/details", {
-            headers: {
-                Authorization: `Bearer ${accessToken}`
-            }
-        }) .then(_res => {
-            req.session.user = _res.data.id;
-            req.session.name = _res.data.firstName;
-
-            return res.redirect("/");
-        })
-            .catch(err => {
-                return res.send("An error occurred while trying to fetch user data!");
-            })
-    } catch (e) {
-        return res.send("An error occurred while handling login process!");
-    }
-})
+app.get("/callback", djo.callback)
 
 const editors = {};
 io.on("connection", socket => {
@@ -115,10 +82,10 @@ io.on("connection", socket => {
         if (!(x < config.width && y < config.height && x >= 0 && y >= 0)) return socket.emit("error", "Out of bounds");
         if (typeof config.colors[color] === "undefined") return socket.emit("error", "Invalid color");
         if (Date.now() - lastAction.get(socket.request.session.user) < config.timer) return socket.emit("error", "You can't change the color too often!");
-        db[y][x] = color;
+        db[y][x] = config.colors[color];
         lastAction.set(socket.request.session.user, Date.now());
 
-        io.emit("color", {x, y, color});
+        io.emit("color", { x, y, color: config.colors[color] });
         fs.writeFileSync("data/db.json", JSON.stringify(db));
         socket.emit("timer", config.timer);
     })
