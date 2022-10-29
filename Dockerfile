@@ -1,6 +1,6 @@
 FROM node:16
 
-RUN useradd -U -u -m 1003 place
+RUN useradd -U -u 1003 -m place
 RUN mkdir /app && chown place:place /app
 
 WORKDIR /app
