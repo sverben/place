@@ -1,0 +1,13 @@
+{
+  "name": "place",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node ."
+  },
+  "dependencies": {
+    "@djoamersfoort/djo-login-js": "github:djoamersfoort/djo-login-js",
+    "express": "^4.18.2",
+    "socket.io": "^4.5.3"
+  }
+}
