@@ -1,10 +1,13 @@
 FROM node:16
 
+RUN useradd -U -u 1003 place
+RUN mkdir /app && chown place:place /app
+
 WORKDIR /app
+USER place
+
 COPY package*.json ./
 
-RUN useradd -U -u 1003 place
-USER place
 RUN npm ci
 
 COPY . /app/
