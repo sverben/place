@@ -68,7 +68,7 @@ io.on('connection', socket => {
     socket.on('color', ({ x, y, color }) => {
         if (!socket.request.session.user)
             return socket.emit('error', 'Not signed in!')
-        if (!config.colors.includes(color))
+        if (!/^#[0-9A-F]{6}$/i.test(color))
             return socket.emit('error', 'Invalid color!')
 
         const error = board.set({ x, y }, color, socket.request.session.djo.id)

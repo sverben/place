@@ -5,6 +5,7 @@ const colors = document.getElementById('colors')
 const error = document.getElementById('error')
 const ctx = canvas.getContext('2d')
 const timer = document.getElementById('timer')
+const colorE = document.getElementById('color')
 canvas.width = window.innerWidth
 canvas.height = window.innerHeight
 window.addEventListener('resize', () => {
@@ -167,7 +168,7 @@ socket.on('colors', codes => {
             board.selected = color
         })
 
-        colors.append(e)
+        colors.insertBefore(e, colorE)
     })
 })
 socket.on('error', err => {
@@ -180,4 +181,11 @@ socket.on('error', err => {
 socket.on('timer', time => {
     board.timer = time.timer
     board.started = time.started
+})
+colorE.addEventListener('change', () => {
+    if (selectedE)
+        selectedE.classList.remove('selected')
+    colorE.classList.add('selected')
+    selectedE = colorE
+    board.selected = colorE.value
 })
